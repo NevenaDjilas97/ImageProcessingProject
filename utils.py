@@ -9,38 +9,24 @@ import math
 
 
 def rgb2hsv(r, g, b):
-        
-    r=r/255.0
-    g=g/255.0
-    b=b/255.0
-    
-    cmax=max(r,g,b)
-    cmin=min(r,g,b)
-    
-    diff=cmax-cmin
-    
-    h=-1
-    
-    s=-1    
-    
-    if cmax==cmin:
-        h=0
-    elif cmax==r:
-        h=(60*((g-b)/diff)+360)%360
-    elif cmax==g:
-        h = (60 * ((b - r) / diff) + 120) % 360 
-    elif cmax==b:
-        h = (60 * ((r - g) / diff) + 240) % 360
-    
-    if cmax==0:
-        s=0
+    r, g, b = r/255.0, g/255.0, b/255.0
+    mx = max(r, g, b)
+    mn = min(r, g, b)
+    df = mx-mn
+    if mx == mn:
+        h = 0
+    elif mx == r:
+        h = (60 * ((g-b)/df) + 360) % 360
+    elif mx == g:
+        h = (60 * ((b-r)/df) + 120) % 360
+    elif mx == b:
+        h = (60 * ((r-g)/df) + 240) % 360
+    if mx == 0:
+        s = 0
     else:
-        s=(diff/cmax)*100
-    v=cmax*100
-    
-    hsv=[h,s,v]
-
-    return hsv
+        s = (df/mx)*100
+    v = mx*100
+    return h, s, v
         
     
 
@@ -71,7 +57,3 @@ def hsv2rgb(h, s, v):
         r, g, b = v, p, q
     r, g, b = int(r * 255), int(g * 255), int(b * 255)
     return r, g, b
-
-print(rgb2hsv(150, 150, 150))
-
-print(hsv2rgb(0, 0, 58.8))
