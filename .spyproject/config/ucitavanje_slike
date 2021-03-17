@@ -8,8 +8,9 @@ import imageio
 def standard(mat):
     for i in range(mat.shape[0]):
         for j in range(mat.shape[1]):
-            if(mat[i,j]>255):
-                mat[i,j]=255
-            if(mat[i,j]<0):
-                mat[i,j]=0
+            for k in range(2):
+                if(mat[i,j][k]>255):
+                    mat[i,j]=255
+                if(mat[i,j][k]<0):
+                    mat[i,j]=0
     return mat.astype(np.uint8)
