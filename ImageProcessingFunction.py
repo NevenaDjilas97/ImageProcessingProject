@@ -11,6 +11,8 @@ from utils import hsv2rgb
 from  PIL import Image
 import math
 
+import numpy as np
+
 
 kelvin_table = {
     1000: (255, 56, 0),
@@ -142,6 +144,8 @@ qualityFactor=2
 
 
 
+
+
 def changeTemp(imagePath,image_save_path):
     image=Image.open(imagePath)
     file_type='.jpg'
@@ -156,7 +160,7 @@ def changeTemp(imagePath,image_save_path):
     seq=image_save_path+kelvin_list_string+file_type
     new_image.save(seq,"JPEG",quality=80,optimize=True, progressive=False)
     
-changeTemp('slika.jpeg','nova_slika')
+#changeTemp('slika.jpeg','nova_slika')
 
 def changeSaturation(imagePath, decimal):
     if decimal<0.0 or decimal>1.0:
@@ -182,7 +186,91 @@ def changeSaturation(imagePath, decimal):
     print('gotovo')
     return 1
 
-changeSaturation("slika.jpeg", 0.5)
+def vignette_effect(imagePath):
+    image=Image.open(imagePath)
+    width,height=image.size
+    
+
+    for i in range(0, height):    
+        for j in range (0,width):
+   
+      
+            cord=(j,i)
+            rgb=image.getpixel(cord)
+        
+            dx=2*j/width-1
+            dy=2*i/height-1
+            d=math.sqrt(dx*dx+dy*dy)
+            if d>1.8:
+                d=1.0
+            r,g,b=rgb
+            hsv=rgb2hsv(r, g, b)    
+            h,s,v=hsv
+            s=s/100.00
+            v=v/100.00*(1-d*0.85)
+            rgb=hsv2rgb(h, s, v)
+            r,g,b=rgb
+            image.putpixel((j,i),(r,g,b))
+            
+    image.save("novaslikavignette.jpeg",quality=80,optimize=True,progressive=False)
+    print("gotovo vignette")
+            
+
+
+
+def rotateImage(imagePath,angle):
+    image = np.array(Image.open(imagePath)) 
+    
+    angle=math.radians(angle) 
+    cosine=math.cos(angle)
+    sine=math.sin(angle)
+    height=image.shape[0]  
+    width=image.shape[1]    
+    
+    new_height  = round(abs(image.shape[0]*cosine)+abs(image.shape[1]*sine))+1
+    new_width  = round(abs(image.shape[1]*cosine)+abs(image.shape[0]*sine))+1
+
+    output=np.zeros((new_height,new_width,image.shape[2]))
+
+    # Find the centre of the image about which we have to rotate the image
+    original_centre_height   = round(((image.shape[0]+1)/2)-1)    #with respect to the original image
+    original_centre_width    = round(((image.shape[1]+1)/2)-1)    #with respect to the original image
+
+    # Find the centre of the new image that will be obtained
+    new_centre_height= round(((new_height+1)/2)-1)        #with respect to the new image
+    new_centre_width= round(((new_width+1)/2)-1)          #with respect to the new image
+    
+    for i in range(height):
+        for j in range(width):
+            #co-ordinates of pixel with respect to the centre of original image
+            y=image.shape[0]-1-i-original_centre_height                   
+            x=image.shape[1]-1-j-original_centre_width                      
+            
+            #co-ordinate of pixel with respect to the rotated image
+            new_y=round(-x*sine+y*cosine)
+            new_x=round(x*cosine+y*sine)
+
+            '''since image will be rotated the centre will change too, 
+            so to adust to that we will need to change new_x and new_y with respect to the new centre'''
+            new_y=new_centre_height-new_y
+            new_x=new_centre_width-new_x
+
+        # adding if check to prevent any errors in the processing
+            if 0 <= new_x < new_width and 0 <= new_y < new_height and new_x>=0 and new_y>=0:
+                output[new_y,new_x,:]=image[i,j,:]                          #writing the pixels to the new destination in the output image
+                
+    pil_img=Image.fromarray((output).astype(np.uint8))                       # converting array to image
+    pil_img.save("rotated_image.png")         
+
+
+
+
+
+    
+vignette_effect("slika.jpeg")
+
+#rotateImage("slika.jpeg", 20)
+#changeSaturation("slika.jpeg", 0.5)
 #print(rgb2hsv(150, 200, 250))
 
 #print(rgb2hsv(150, 200, 250))
