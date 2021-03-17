@@ -14,3 +14,7 @@ def standard(mat):
                 if(mat[i,j][k]<0):
                     mat[i,j]=0
     return mat.astype(np.uint8)
+    
+def ucitaj_sliku (slika):
+    X= plt.imread(slika)
+    plt.imshow(standard(X))
