@@ -10,6 +10,7 @@ from utils import rgb2hsv
 from utils import hsv2rgb
 from  PIL import Image
 import math
+from image import MyImage
 
 import numpy as np
 
@@ -144,7 +145,75 @@ qualityFactor=2
 
 
 
+def fade_out(image_path, factor):   
+    image=Image.open(image_path)
+    w,h=image.size
+    matrixR=[]#np.empty((w,h),dtype=np.int32)
+    matrixG=[]#np.empty((w,h),dtype=np.int32)
+    matrixB=[]#np.empty((w,h),dtype=np.int32)
+    for i in range (0,h):
+        rowlistR=[]
+        rowlistG=[]
+        rowlistB=[]
+        for j in range (0,w):
+            rowlistR.append(image.getpixel((j,i))[0]//factor)
+            rowlistG.append(image.getpixel((j,i))[1]//factor)
+            rowlistB.append(image.getpixel((j,i))[2]//factor)       
+        matrixR.append(rowlistR)
+        matrixG.append(rowlistG)
+        matrixB.append(rowlistB)
+    
+    for k in range (10):     
+        for i in range (0,h):
+            for j in range (0,w):
+                r=int(image.getpixel((j,i))[0]-matrixR[i][j])
+                g=int(image.getpixel((j,i))[1]-matrixG[i][j])
+                b=int(image.getpixel((j,i))[2]-matrixB[i][j])
+                image.putpixel((j,i),(r,g,b))
+                
+        seq='fadeout'+str(k)
+        image.save(seq,"JPEG",quality=80,optimize=True,progressive=False)
+    
+    
+#fade_out("slika.jpeg", 10)
 
+
+'''
+
+    warm povecaj r i b komp
+
+'''
+
+def warmmth(image_path,factor):
+    if factor<-10:
+        factor=-10
+    if factor>10:
+        factor=10
+        
+    image=Image.open(image_path)
+    w,h=image.size
+    for i in range(0,h):
+        for j in range (0,w):
+            rgb=image.getpixel((j,i))
+            r,g,b=rgb[0],rgb[1],rgb[2]
+            if factor > 0:
+                r+=factor*5
+                if r>255:
+                    r=255
+                
+            else:
+                b+=-factor*10
+                if b>255:
+                    b=255
+            image.putpixel((j,i),(r,g,b))
+                
+    image.save('warm_image',"JPEG",quality=80,optimize=True, progressive=False)
+    print('gotovo')
+            
+    
+
+#warmmth('slika.jpeg', 5)
+    
 
 def changeTemp(imagePath,image_save_path):
     image=Image.open(imagePath)
@@ -167,10 +236,10 @@ def changeSaturation(imagePath, decimal):
         print ("error")
         return 0
     
-    image=Image.open(imagePath)
+    image=MyImage.open(imagePath)
     
-    for x in range(image.width):
-        for y in range(image.height):
+    for x in range(image.width-1):
+        for y in range(image.height-1):
             cord=(x,y)
             rgb=image.getpixel(cord)
             hsb=rgb2hsv(rgb[0], rgb[1], rgb[2])
@@ -182,9 +251,12 @@ def changeSaturation(imagePath, decimal):
             r,g,b=hsv2rgb(h,s,b)
             image.putpixel((x,y),(r,g,b))
            
-    image.save("novaslika.jpeg",quality=80,optimize=True, progressive=False)        
+    image.save("novaslikasaturacijaaaaaaaaaaaaaaaaa.jpeg")        
     print('gotovo')
     return 1
+
+changeSaturation('slika.jpeg', 0)
+
 
 def vignette_effect(imagePath):
     image=Image.open(imagePath)
@@ -203,7 +275,7 @@ def vignette_effect(imagePath):
             d=math.sqrt(dx*dx+dy*dy)
             if d>1.8:
                 d=1.0
-            r,g,b=rgb
+            r,g,b=rgb 
             hsv=rgb2hsv(r, g, b)    
             h,s,v=hsv
             s=s/100.00
@@ -215,6 +287,95 @@ def vignette_effect(imagePath):
     image.save("novaslikavignette.jpeg",quality=80,optimize=True,progressive=False)
     print("gotovo vignette")
             
+def crop_image(image_path, from_x, from_y, to_x, to_y ):
+    image=Image.open(image_path)
+    difference_x=to_x-from_x
+    difference_y=to_y-from_y
+    new_image=Image.new(mode="RGB", size=(difference_x,difference_y))
+    w,h=image.size
+    l=0
+    k=0
+    for i in range (from_x, to_x):
+        for j in range (from_y, to_y):
+           
+            new_image.putpixel((l,k), image.getpixel((i,j)))
+            k+=1
+        k=0
+        l+=1
+    print('gotov crop')
+    new_image.save("cropped_image.jpeg",quality=80,optimize=True,progressive=False)
+    return new_image
+    
+#crop_image('slika.jpeg', 0, 0, 500,500)
+
+
+def resizetest(width,height,image_path):
+    image=Image.open(image_path)
+    image_resize=image.resize((1080,1080))
+    image_resize.save("resized.jpeg",quality=80,optimize=True,progressive=False)
+
+#resize(1,1,'slika.jpeg')
+
+
+
+def zoom(image_path,pivot_x,pivot_y,factor):
+    print('zoom')
+    image=Image.open(image_path)
+    w,h=image.size
+    print(w,h,'to je w i h')
+    x1=pivot_x-w//(2*factor)
+    y1=pivot_y-h//(2*factor)
+    
+    x2=pivot_x+w//(2*factor)
+    y2=pivot_y+h//(2*factor)
+    
+    difference_x=x2-x1
+    difference_y=y2-y1
+    
+    print(x1,x2,y1,y2)
+    image_croped=crop_image(image_path,x1,y1,x2,y2)
+    
+    
+    zoomed_image=Image.new(mode="RGB", size=(w,h))
+    
+    sh=h/difference_y
+    sw=w/difference_x
+
+    for i in range (0,h):
+        for j in range (0,w):
+            #print(i,j)
+            y=int(i/sh)
+            x=int(j/sw)
+            
+            zoomed_image.putpixel((j,i), image_croped.getpixel((x,y)))
+            
+    zoomed_image.save("zoomed_image.jpeg", quality=80,optimize=True, progressive=False)        
+    
+#zoom('slika.jpeg', 1000, 500, 10)    
+    
+    
+def nearest_neighbour(new_width,new_height,image_path):
+    image=Image.open(image_path)
+    streched_image=Image.new(mode='RGB',size=(new_width,new_height))
+    w,h=image.size
+    
+    sh=new_height/h
+    sw=new_width/w
+    
+    for i in range(new_height):
+        for j in range(new_width):
+            y=int(i/sh)
+            x=int(j/sw)
+            
+            streched_image.putpixel((j,i), image.getpixel((x,y)))
+            
+    streched_image.save('streched_image.jpeg',quality=80,optimize=True, progressive=False)
+    
+    
+#nearest_neighbour(1920, 1080, 'slika.jpeg')
+    
+
+
 
 
 
@@ -230,15 +391,21 @@ def rotateImage(imagePath,angle):
     new_height  = round(abs(image.shape[0]*cosine)+abs(image.shape[1]*sine))+1
     new_width  = round(abs(image.shape[1]*cosine)+abs(image.shape[0]*sine))+1
 
+    print(new_height,new_width)
+
     output=np.zeros((new_height,new_width,image.shape[2]))
 
     # Find the centre of the image about which we have to rotate the image
     original_centre_height   = round(((image.shape[0]+1)/2)-1)    #with respect to the original image
     original_centre_width    = round(((image.shape[1]+1)/2)-1)    #with respect to the original image
 
+
     # Find the centre of the new image that will be obtained
     new_centre_height= round(((new_height+1)/2)-1)        #with respect to the new image
     new_centre_width= round(((new_width+1)/2)-1)          #with respect to the new image
+    
+
+    
     
     for i in range(height):
         for j in range(width):
@@ -259,18 +426,152 @@ def rotateImage(imagePath,angle):
             if 0 <= new_x < new_width and 0 <= new_y < new_height and new_x>=0 and new_y>=0:
                 output[new_y,new_x,:]=image[i,j,:]                          #writing the pixels to the new destination in the output image
                 
-    pil_img=Image.fromarray((output).astype(np.uint8))                       # converting array to image
-    pil_img.save("rotated_image.png")         
+    pil_img=Image.fromarray((output).astype(np.uint8))  
+                     # converting array to image
+    
 
+    width_relation=width/new_width
+    height_relation=height/new_height
+    
+    
+    dole_levo=round(height*sine)
+    
+    dole_desno=round(width*sine)
+    
+    pil_img.save("rotated_image.png")       
+    
+    nearest_neighbour(new_width+2*dole_desno+2,new_height+2*dole_levo+2,'rotated_image.png')
+    
+    image_streched=Image.open('streched_image.jpeg')
+    w,h=image_streched.size
+    center_x=w//2
+    center_y=h//2
+    
+    crop_image('streched_image.jpeg', center_x-width//2, center_y-height//2, center_x+width//2, center_y+height//2)
+    
+
+#rotateImage('slika.jpeg', 20)
+
+def shadows(image_path, factor):
+    if factor<-100:
+        factor=-100
+    if factor>100:
+        factor=100
+        
+    image=Image.open(image_path)
+    width,height=image.size
+    
+    for i in range(height):
+        for j in range(width):
+           
+           rgb=image.getpixel((j,i))
+           hsv=rgb2hsv(rgb[0], rgb[1], rgb[2])
+           v=hsv[2]
+           '''if factor<0:
+            
+               if v <25:
+                   v+=0.4*factor
+               elif v<50:
+                   v+=0.3*factor
+               elif v<75:
+                   v+=0.2*factor
+               else:
+                   v+=0.1*factor
+               if v<0:
+                   v=0
+           else:
+            
+               if v<25:
+                   v+=0.5*factor
+               elif v<50:
+                   v+=0.35*factor
+               elif v<75:
+                   v+=0.2*factor
+               else:
+                   v+=0.1*factor
+               if v>100:
+                   v=100'''
+                   
+                   
+           v = (v/100)**(2**(-factor/100))*100
+                 
+           hsv[2]=v
+           newrgb=hsv2rgb(hsv[0], hsv[1]/100, hsv[2]/100)
+           r,g,b=newrgb
+           image.putpixel((j,i),(r,g,b))
+    print('gotovo')
+    image.save("slika_shadow.jpeg",quality=80,optimize=True, progressive=False) 
+    
+
+#shadows('sunrises.jpg',-100)
+    
+def highlights(image_path,factor):
+    if factor<-100:
+        factor=-100
+    if factor>100:
+        factor=100
+        
+    image=Image.open(image_path)
+    width,height=image.size
+    
+    for i in range(height):
+        for j in range(width):
+           rgb=image.getpixel((j,i))
+           hsv=rgb2hsv(rgb[0], rgb[1], rgb[2])
+           v=hsv[2]
+           '''if factor<0:
+               print('hello')
+               if v<25:
+                   v-=0.1*factor
+               elif v<50:
+                   v-=0.2*factor
+               elif v<75:
+                   v-=0.3*factor
+               else:
+                   v-=0.4*factor
+               if v<0:
+                   v=0
+            
+           else:
+               if v<25:
+                   v+=0.1*factor
+               elif v<50:
+                   v+=0.2*factor
+               elif v<75:
+                   v+=0.3*factor
+               else:
+                   v+=0.4*factor
+               
+           if v>100:
+               v=100'''
+           v=((v/100+1)**(2**(factor/200))-1)*100
+           if v>100:
+               v=100
+           if v<0:
+               v=0
+           #v = 100-((1-v/100)**(2**(factor/100))*100)
+           hsv[2]=v
+           newrgb=hsv2rgb(hsv[0], hsv[1]/100, hsv[2]/100)
+           r,g,b=newrgb
+           image.putpixel((j,i),(r,g,b))
+                
+    image.save("slika_shadow.jpeg",quality=80,optimize=True, progressive=False)  
+           
+#highlights('sunrises.jpg', -100)
+
+
+
+
+#rotateImage('slika.jpeg', 20)
 
 
 
 
     
-vignette_effect("slika.jpeg")
+#vignette_effect("slika.jpeg")
 
 #rotateImage("slika.jpeg", 20)
-#changeSaturation("slika.jpeg", 0.5)
+#changeSaturation("slika.jpeg", 0.4)
 #print(rgb2hsv(150, 200, 250))
 
 #print(rgb2hsv(150, 200, 250))
