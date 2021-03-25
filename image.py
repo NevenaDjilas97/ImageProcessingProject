@@ -7,6 +7,7 @@ Created on Tue Mar 23 20:25:12 2021
 """
 import numpy as np
 from  PIL import Image
+from utils import rgb2hsv
 
 class MyImage:
     
@@ -25,7 +26,10 @@ class MyImage:
     
     def open(image_path):
         return  MyImage(image_path)
-        
+    
+    
+    
+    
     def save(self,save_image_path):
        image=Image.fromarray(self.arr)
        image.save(save_image_path,quality=80,optimize=True, progressive=False)
@@ -47,12 +51,31 @@ class MyImage:
     def convert(self):
         print('soon')
         
-    def histogram(self):
-        print('soon')
-    
-    
-image=MyImage.open('slika.jpeg')
-w,h=image.getSize()
+    def histogramHSV(self):
+        histogram=[]
+        for i in range (self.height):
+            for j in range(self.width):
+                r,g,b=self.getpixel((j,i))
+                hsv=rgb2hsv(r,g,b)
+                histogram[int(hsv[0])]+=1
+        return histogram           
+     
+    def histogramRGB(self):
+        histogramrgb=np.zeros((255,3))
+        for i in range (self.height):
+            for j in range(self.width):
+                r,g,b=self.getpixel((j,i))
+                histogramrgb[r][0]+=1
+                histogramrgb[g][1]+=1
+                histogramrgb[b][2]+=1
+        return histogramrgb
+
+image=MyImage.open('test.jpg')
+image.histogram()
+'''w,h=image.getSize()
 for i in range(0,h):
     for j in range (0,w):
         image.getpixel((j,i))
+        '''
+
+        
