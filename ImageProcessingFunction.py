@@ -174,45 +174,50 @@ def fade_out(image_path, factor):
         seq='fadeout'+str(k)
         image.save(seq,"JPEG",quality=80,optimize=True,progressive=False)
     
-    
-#fade_out("slika.jpeg", 10)
+#fade_out('sunrises.jpg', 4)
 
+def fade(image_path, factor):   
+    if factor<0:
+        factor=0
+    if factor>100:
+        factor=100
+    a = np.array(Image.open("sunrises.jpg"), dtype=np.float32)
+  
+    b=a*0.67+8+factor/2
 
-'''
+    Image.fromarray(np.uint8(np.rint(b))).save("fade.jpg")    
 
-    warm povecaj r i b komp
+#fade('sunrises.jpg',100)
 
-'''
 
 def warmmth(image_path,factor):
-    if factor<-10:
-        factor=-10
-    if factor>10:
-        factor=10
+    if factor<-50:
+        factor=-50
+    if factor>50:
+        factor=50
         
-    image=Image.open(image_path)
-    w,h=image.size
+    image=MyImage.open(image_path)
+    w,h=image.getSize()
     for i in range(0,h):
         for j in range (0,w):
             rgb=image.getpixel((j,i))
             r,g,b=rgb[0],rgb[1],rgb[2]
             if factor > 0:
-                r+=factor*5
+                r+=factor
                 if r>255:
                     r=255
                 
             else:
-                b+=-factor*10
+                b+=-factor
                 if b>255:
                     b=255
             image.putpixel((j,i),(r,g,b))
                 
-    image.save('warm_image',"JPEG",quality=80,optimize=True, progressive=False)
+    image.save('warmth.jpg')
     print('gotovo')
             
-    
+#warmmth('sunrises.jpg', 50)
 
-#warmmth('slika.jpeg', 5)
     
 
 def changeTemp(imagePath,image_save_path):
@@ -232,12 +237,11 @@ def changeTemp(imagePath,image_save_path):
 #changeTemp('slika.jpeg','nova_slika')
 
 def changeSaturation(imagePath, decimal):
-    if decimal<0.0 or decimal>1.0:
+    if decimal<0.0:
         print ("error")
         return 0
     
     image=MyImage.open(imagePath)
-    
     for x in range(image.width-1):
         for y in range(image.height-1):
             cord=(x,y)
@@ -248,14 +252,16 @@ def changeSaturation(imagePath, decimal):
             s=s/100
             b=b/100
             s=s*decimal
+            if s>1:
+                s=1
             r,g,b=hsv2rgb(h,s,b)
             image.putpixel((x,y),(r,g,b))
            
-    image.save("novaslikasaturacijaaaaaaaaaaaaaaaaa.jpeg")        
+    image.save("saturation.jpg")        
     print('gotovo')
     return 1
 
-changeSaturation('slika.jpeg', 0)
+#changeSaturation('sunrises.jpg', 0.4)
 
 
 def vignette_effect(imagePath):
@@ -279,13 +285,16 @@ def vignette_effect(imagePath):
             hsv=rgb2hsv(r, g, b)    
             h,s,v=hsv
             s=s/100.00
-            v=v/100.00*(1-d*0.85)
+            v=v/100.00*(1-d*0.80)
             rgb=hsv2rgb(h, s, v)
             r,g,b=rgb
             image.putpixel((j,i),(r,g,b))
             
-    image.save("novaslikavignette.jpeg",quality=80,optimize=True,progressive=False)
+    image.save("vignette.jpg",quality=80,optimize=True,progressive=False)
     print("gotovo vignette")
+    
+#vignette_effect('sunrises.jpg')    
+    
             
 def crop_image(image_path, from_x, from_y, to_x, to_y ):
     image=Image.open(image_path)
@@ -307,15 +316,6 @@ def crop_image(image_path, from_x, from_y, to_x, to_y ):
     return new_image
     
 #crop_image('slika.jpeg', 0, 0, 500,500)
-
-
-def resizetest(width,height,image_path):
-    image=Image.open(image_path)
-    image_resize=image.resize((1080,1080))
-    image_resize.save("resized.jpeg",quality=80,optimize=True,progressive=False)
-
-#resize(1,1,'slika.jpeg')
-
 
 
 def zoom(image_path,pivot_x,pivot_y,factor):
@@ -349,9 +349,9 @@ def zoom(image_path,pivot_x,pivot_y,factor):
             
             zoomed_image.putpixel((j,i), image_croped.getpixel((x,y)))
             
-    zoomed_image.save("zoomed_image.jpeg", quality=80,optimize=True, progressive=False)        
+    zoomed_image.save("zoomed.jpg", quality=80,optimize=True, progressive=False)        
     
-#zoom('slika.jpeg', 1000, 500, 10)    
+#zoom('sunrises.jpg', 500, 400, 2)    
     
     
 def nearest_neighbour(new_width,new_height,image_path):
@@ -381,7 +381,6 @@ def nearest_neighbour(new_width,new_height,image_path):
 
 def rotateImage(imagePath,angle):
     image = np.array(Image.open(imagePath)) 
-    
     angle=math.radians(angle) 
     cosine=math.cos(angle)
     sine=math.sin(angle)
@@ -450,7 +449,7 @@ def rotateImage(imagePath,angle):
     crop_image('streched_image.jpeg', center_x-width//2, center_y-height//2, center_x+width//2, center_y+height//2)
     
 
-#rotateImage('slika.jpeg', 20)
+#rotateImage('sunrises.jpg', 20)
 
 def shadows(image_path, factor):
     if factor<-100:
@@ -458,8 +457,8 @@ def shadows(image_path, factor):
     if factor>100:
         factor=100
         
-    image=Image.open(image_path)
-    width,height=image.size
+    image=MyImage.open(image_path)
+    width,height=image.getSize()
     
     for i in range(height):
         for j in range(width):
@@ -467,43 +466,16 @@ def shadows(image_path, factor):
            rgb=image.getpixel((j,i))
            hsv=rgb2hsv(rgb[0], rgb[1], rgb[2])
            v=hsv[2]
-           '''if factor<0:
-            
-               if v <25:
-                   v+=0.4*factor
-               elif v<50:
-                   v+=0.3*factor
-               elif v<75:
-                   v+=0.2*factor
-               else:
-                   v+=0.1*factor
-               if v<0:
-                   v=0
-           else:
-            
-               if v<25:
-                   v+=0.5*factor
-               elif v<50:
-                   v+=0.35*factor
-               elif v<75:
-                   v+=0.2*factor
-               else:
-                   v+=0.1*factor
-               if v>100:
-                   v=100'''
-                   
-                   
+                
            v = (v/100)**(2**(-factor/100))*100
-                 
-           hsv[2]=v
-           newrgb=hsv2rgb(hsv[0], hsv[1]/100, hsv[2]/100)
+           
+           newrgb=hsv2rgb(hsv[0], hsv[1]/100, v/100)
            r,g,b=newrgb
            image.putpixel((j,i),(r,g,b))
     print('gotovo')
-    image.save("slika_shadow.jpeg",quality=80,optimize=True, progressive=False) 
+    image.save("shadow.jpg") 
     
-
-#shadows('sunrises.jpg',-100)
+#x`shadows('sunrises.jpg',-50)
     
 def highlights(image_path,factor):
     if factor<-100:
@@ -511,62 +483,30 @@ def highlights(image_path,factor):
     if factor>100:
         factor=100
         
-    image=Image.open(image_path)
-    width,height=image.size
+    image=MyImage.open(image_path)
+    width,height=image.getSize()
     
     for i in range(height):
         for j in range(width):
            rgb=image.getpixel((j,i))
            hsv=rgb2hsv(rgb[0], rgb[1], rgb[2])
            v=hsv[2]
-           '''if factor<0:
-               print('hello')
-               if v<25:
-                   v-=0.1*factor
-               elif v<50:
-                   v-=0.2*factor
-               elif v<75:
-                   v-=0.3*factor
-               else:
-                   v-=0.4*factor
-               if v<0:
-                   v=0
-            
-           else:
-               if v<25:
-                   v+=0.1*factor
-               elif v<50:
-                   v+=0.2*factor
-               elif v<75:
-                   v+=0.3*factor
-               else:
-                   v+=0.4*factor
-               
-           if v>100:
-               v=100'''
            v=((v/100+1)**(2**(factor/200))-1)*100
            if v>100:
                v=100
            if v<0:
                v=0
            #v = 100-((1-v/100)**(2**(factor/100))*100)
-           hsv[2]=v
-           newrgb=hsv2rgb(hsv[0], hsv[1]/100, hsv[2]/100)
+           
+           newrgb=hsv2rgb(hsv[0], hsv[1]/100,v/100)
            r,g,b=newrgb
            image.putpixel((j,i),(r,g,b))
                 
-    image.save("slika_shadow.jpeg",quality=80,optimize=True, progressive=False)  
+    image.save("highlight.jpg")  
            
-#highlights('sunrises.jpg', -100)
-
-
-
+#highlights('sunrises.jpg', -50)
 
 #rotateImage('slika.jpeg', 20)
-
-
-
-
     
 #vignette_effect("slika.jpeg")
 

@@ -8,6 +8,7 @@ Created on Tue Mar 23 20:25:12 2021
 import numpy as np
 from  PIL import Image
 from utils import rgb2hsv
+import matplotlib.pyplot as plt
 
 class MyImage:
     
@@ -61,17 +62,27 @@ class MyImage:
         return histogram           
      
     def histogramRGB(self):
-        histogramrgb=np.zeros((255,3))
+        histogramrgb=np.zeros((256,3))
         for i in range (self.height):
             for j in range(self.width):
                 r,g,b=self.getpixel((j,i))
                 histogramrgb[r][0]+=1
                 histogramrgb[g][1]+=1
                 histogramrgb[b][2]+=1
-        return histogramrgb
+        
+        plt.hist(histogramrgb,density=True,bins=30)
+        plt.xlabel('NUMBER')
+        plt.ylabel('RGB')
+        plt.title('HISTOGRAM')
+        plt.show()
+                
+        
+#image=MyImage.open('sunrises.jpg')
+#image.histogramRGB()
+    
+            
 
-image=MyImage.open('test.jpg')
-image.histogram()
+#image=MyImage.open('test.jpg')i2mage.histogram()
 '''w,h=image.getSize()
 for i in range(0,h):
     for j in range (0,w):
