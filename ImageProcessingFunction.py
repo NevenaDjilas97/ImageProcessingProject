@@ -143,7 +143,7 @@ kelvin_list = [ 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900,
 
 qualityFactor=2
 
-
+'''
 
 def fade_out(image_path, factor):   
     image=Image.open(image_path)
@@ -175,7 +175,7 @@ def fade_out(image_path, factor):
         image.save(seq,"JPEG",quality=80,optimize=True,progressive=False)
     
 #fade_out('sunrises.jpg', 4)
-
+'''
 def fade(image_path, factor):   
     if factor<0:
         factor=0
@@ -200,7 +200,7 @@ def warmmth(image_path,factor):
     w,h=image.getSize()
     for i in range(0,h):
         for j in range (0,w):
-            rgb=image.getpixel((j,i))
+            rgb=image.getpixel((i,j))
             r,g,b=rgb[0],rgb[1],rgb[2]
             if factor > 0:
                 r+=factor
@@ -211,7 +211,7 @@ def warmmth(image_path,factor):
                 b+=-factor
                 if b>255:
                     b=255
-            image.putpixel((j,i),(r,g,b))
+            image.putpixel((i,j),(r,g,b))
                 
     image.save('warmth.jpg')
     print('gotovo')
@@ -220,7 +220,7 @@ def warmmth(image_path,factor):
 
     
 
-def changeTemp(imagePath,image_save_path):
+'''def changeTemp(imagePath,image_save_path):
     image=Image.open(imagePath)
     file_type='.jpg'
             
@@ -235,7 +235,7 @@ def changeTemp(imagePath,image_save_path):
     new_image.save(seq,"JPEG",quality=80,optimize=True, progressive=False)
     
 #changeTemp('slika.jpeg','nova_slika')
-
+'''
 def changeSaturation(imagePath, decimal):
     if decimal<0.0:
         print ("error")
@@ -244,7 +244,7 @@ def changeSaturation(imagePath, decimal):
     image=MyImage.open(imagePath)
     for x in range(image.width-1):
         for y in range(image.height-1):
-            cord=(x,y)
+            cord=(y,x)
             rgb=image.getpixel(cord)
             hsb=rgb2hsv(rgb[0], rgb[1], rgb[2])
             
@@ -255,7 +255,7 @@ def changeSaturation(imagePath, decimal):
             if s>1:
                 s=1
             r,g,b=hsv2rgb(h,s,b)
-            image.putpixel((x,y),(r,g,b))
+            image.putpixel((y,x),(r,g,b))
            
     image.save("saturation.jpg")        
     print('gotovo')
@@ -265,19 +265,21 @@ def changeSaturation(imagePath, decimal):
 
 
 def vignette_effect(imagePath):
-    image=Image.open(imagePath)
-    width,height=image.size
-    
+    image=MyImage.open(imagePath)
+    width,height=image.getSize()
+    print(width,height)
 
-    for i in range(0, height):    
-        for j in range (0,width):
+    for i in range(0, width):    
+        for j in range (0,height):
    
-      
             cord=(j,i)
             rgb=image.getpixel(cord)
+            
+           
+            
         
-            dx=2*j/width-1
-            dy=2*i/height-1
+            dx=2*i/width-1
+            dy=2*j/height-1
             d=math.sqrt(dx*dx+dy*dy)
             if d>1.8:
                 d=1.0
@@ -285,15 +287,18 @@ def vignette_effect(imagePath):
             hsv=rgb2hsv(r, g, b)    
             h,s,v=hsv
             s=s/100.00
-            v=v/100.00*(1-d*0.80)
+            v=v/100.00*(1-d*0.75)
             rgb=hsv2rgb(h, s, v)
             r,g,b=rgb
+            
+            
             image.putpixel((j,i),(r,g,b))
             
-    image.save("vignette.jpg",quality=80,optimize=True,progressive=False)
+            
+    image.save("vignette.jpg")
     print("gotovo vignette")
     
-#vignette_effect('sunrises.jpg')    
+vignette_effect('sunrises.jpg')    
     
             
 def crop_image(image_path, from_x, from_y, to_x, to_y ):
@@ -349,8 +354,7 @@ def zoom(image_path,pivot_x,pivot_y,factor):
             
             zoomed_image.putpixel((j,i), image_croped.getpixel((x,y)))
             
-    zoomed_image.save("zoomed.jpg", quality=80,optimize=True, progressive=False)        
-    
+    zoomed_image.save("zoomed.jpg", quality=80,optimize=True, progressive=False)            
 #zoom('sunrises.jpg', 500, 400, 2)    
     
     
@@ -371,8 +375,7 @@ def nearest_neighbour(new_width,new_height,image_path):
             
     streched_image.save('streched_image.jpeg',quality=80,optimize=True, progressive=False)
     
-    
-#nearest_neighbour(1920, 1080, 'slika.jpeg')
+#nearest_neighbour(1920, 1080, 'sunrises.jpg')
     
 
 
@@ -503,7 +506,23 @@ def highlights(image_path,factor):
            image.putpixel((j,i),(r,g,b))
                 
     image.save("highlight.jpg")  
-           
+        
+    
+def test():
+    imagepillow=Image.open('sunrises.jpg')
+    imagemoja=MyImage.open('sunrises.jpg')
+    
+    print(imagepillow.size)
+    print(imagemoja.getSize())
+    
+   #print('pill',pillw,pillh)
+   # print('moja',mojaw,mojah)
+   # for i in range(w):
+       # for j in range (h):
+            
+            
+#test()
+    
 #highlights('sunrises.jpg', -50)
 
 #rotateImage('slika.jpeg', 20)

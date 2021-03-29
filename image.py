@@ -17,10 +17,13 @@ class MyImage:
         image=Image.open(image_path)
         self.image_path=image_path
         self.arr=np.array(image)
-        self.height=self.arr[0].size//3
-        self.width=self.arr.size//3//self.height
+        self.width=self.arr[0].size//3
+        self.height=self.arr.size//3//self.width
       
       
+
+    def new(width,height):
+        return MyImage(width, height)
     
     def getSize(self):
         return (self.width,self.height)
@@ -44,6 +47,18 @@ class MyImage:
     def putpixel(self,shape, rgb):
         w,h=shape[0],shape[1]
         r,g,b=rgb[0],rgb[1],rgb[2]
+        if r<0:
+            r=0
+        if r>255:
+            r=255
+        if g <0:
+            g=0
+        if g>255:
+            g=255
+        if b<0:
+            b=0
+        if b>255:
+            b=255
         self.arr[w][h][0]=r
         self.arr[w][h][1]=g
         self.arr[w][h][2]=b
@@ -80,7 +95,8 @@ class MyImage:
 #image=MyImage.open('sunrises.jpg')
 #image.histogramRGB()
     
-            
+rgb=(1,1,1)
+print(rgb+2)           
 
 #image=MyImage.open('test.jpg')i2mage.histogram()
 '''w,h=image.getSize()
