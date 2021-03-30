@@ -9,6 +9,8 @@ import numpy as np
 from  PIL import Image
 import matplotlib.pyplot as plt
 
+
+
 class MyImage:
     
     
@@ -67,9 +69,26 @@ class MyImage:
         self.arr[h][w][0]=r
         self.arr[h][w][1]=g
         self.arr[h][w][2]=b
+
+def histogram(slika):
+    image = MyImage.open(slika)
+    w, h = image.getSize()
+    red = []
+    green = []
+    blue = []
+    for x in range(w):
+        for y in range(h):
+            rgb = image.getpixel((x, y))
+            red.append(rgb[0])
+            green.append(rgb[1])
+            blue.append(rgb[2])
+    plt.hist(red, 256, density=1, facecolor='r', alpha=0.5)
+    plt.hist(green, 256, density=1, facecolor='g', alpha=0.5)
+    plt.hist(blue, 256, density=1, facecolor='b', alpha=0.5)
+    plt.xlabel('value')
+
+    plt.show()
     
-        
-           
 arr=np.zeros((2,5))
 print(arr)
         
