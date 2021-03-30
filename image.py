@@ -88,7 +88,7 @@ def histogram(slika):
     plt.xlabel('value')
 
     plt.show()
-    
+
 arr=np.zeros((2,5))
 print(arr)
         

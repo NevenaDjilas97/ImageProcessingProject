@@ -15,8 +15,6 @@ from image import MyImage
 import numpy as np
 
 
-
-
 def fade(image_path, factor):   
     if factor<0:
         factor=0
@@ -59,9 +57,8 @@ def warmmth(image_path,factor):
             
 #warmmth('sunrises.jpg', 50)
 
-    
 
-def changeSaturation(imagePath, decimal):
+def saturation(imagePath, decimal):
     if decimal<0.0:
         print ("error")
         return 0
