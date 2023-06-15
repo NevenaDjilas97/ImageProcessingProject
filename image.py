@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+    #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Tue Mar 23 20:25:12 2021
@@ -7,25 +7,36 @@ Created on Tue Mar 23 20:25:12 2021
 """
 import numpy as np
 from  PIL import Image
-from utils import rgb2hsv
+import matplotlib.pyplot as plt
+
+
 
 class MyImage:
     
     
-    def __init__(self, image_path):
-        image=Image.open(image_path)
-        self.image_path=image_path
-        self.arr=np.array(image)
-        self.height=self.arr[0].size//3
-        self.width=self.arr.size//3//self.height
+    def __init__(self, image_path='prazno',width=0,height=4):
+        if width==0:
+            image=Image.open(image_path)
+            self.image_path=image_path
+            self.arr=np.array(image)
+            self.width=self.arr[0].size//3
+            self.height=self.arr.size//3//self.width
+        else:
+            self.width=width
+            self.height=height
+            self.arr=np.empty((height,width,3),dtype=np.int8)
+            self.arr=self.arr.astype(np.uint8)
+            
       
-      
+
+    def new(width,height):
+        return MyImage('bezveze',width, height)
     
     def getSize(self):
         return (self.width,self.height)
     
     def open(image_path):
-        return  MyImage(image_path)
+        return  MyImage(image_path,0,0)
     
     
     
@@ -37,41 +48,57 @@ class MyImage:
     def getpixel(self,shape):
         w=shape[0]
         h=shape[1]
-        r,g,b=self.arr[w][h]
+        r,g,b=self.arr[h][w]
         return (r,g,b)
         
     def putpixel(self,shape, rgb):
         w,h=shape[0],shape[1]
         r,g,b=rgb[0],rgb[1],rgb[2]
-        self.arr[w][h][0]=r
-        self.arr[w][h][1]=g
-        self.arr[w][h][2]=b
-    
+        if r<0:
+            r=0
+        if r>255:
+            r=255
+        if g <0:
+            g=0
+        if g>255:
+            g=255
+        if b<0:
+            b=0
+        if b>255:
+            b=255
+        self.arr[h][w][0]=r
+        self.arr[h][w][1]=g
+        self.arr[h][w][2]=b
 
-    def convert(self):
-        print('soon')
+def histogram(slika):
+    image = MyImage.open(slika)
+    w, h = image.getSize()
+    red = []
+    green = []
+    blue = []
+    for x in range(w):
+        for y in range(h):
+            rgb = image.getpixel((x, y))
+            red.append(rgb[0])
+            green.append(rgb[1])
+            blue.append(rgb[2])
+    plt.hist(red, 256, density=1, facecolor='r', alpha=0.5)
+    plt.hist(green, 256, density=1, facecolor='g', alpha=0.5)
+    plt.hist(blue, 256, density=1, facecolor='b', alpha=0.5)
+    plt.xlabel('value')
+
+    plt.show()
+
+arr=np.zeros((2,5))
+print(arr)
         
-    def histogramHSV(self):
-        histogram=[]
-        for i in range (self.height):
-            for j in range(self.width):
-                r,g,b=self.getpixel((j,i))
-                hsv=rgb2hsv(r,g,b)
-                histogram[int(hsv[0])]+=1
-        return histogram           
-     
-    def histogramRGB(self):
-        histogramrgb=np.zeros((255,3))
-        for i in range (self.height):
-            for j in range(self.width):
-                r,g,b=self.getpixel((j,i))
-                histogramrgb[r][0]+=1
-                histogramrgb[g][1]+=1
-                histogramrgb[b][2]+=1
-        return histogramrgb
+#image=MyImage.open('sunrises.jpg')
+#image.histogramRGB()
+    
+#rgb=(1,1,1)
+#print(rgb+2)           
 
-image=MyImage.open('test.jpg')
-image.histogram()
+#image=MyImage.open('test.jpg')i2mage.histogram()
 '''w,h=image.getSize()
 for i in range(0,h):
     for j in range (0,w):
